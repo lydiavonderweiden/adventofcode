@@ -1,5 +1,6 @@
 def load():
     input = open("input")
+    #input = open("test.txt")
     values = [line.strip("\n").split(" | ") for line in input.readlines()]
     
     signal = []
@@ -40,9 +41,9 @@ def decode_signal(sig):
             case 5: twothreefive.append(s)
             case 6: zerosixnine.append(s)
 
-    decode = decode_zerosixnine(zerosixnine, decode)    
+    decode = decode_zerosixnine(zerosixnine, decode)
+    decode = decode_twothreefive(twothreefive, decode)    
 
-    print(decode)
     return decode
                 
 def decode_zerosixnine(zerosixnine, decode):
@@ -50,8 +51,7 @@ def decode_zerosixnine(zerosixnine, decode):
     one = decode[1]
 
     for num in zerosixnine:
-        test = [f in num for f in four]
-        if all(test):
+        if all([f in num for f in four]):
             decode[9] = num
         elif not all([f in num for f in one]):
             decode[6] = num
@@ -61,10 +61,35 @@ def decode_zerosixnine(zerosixnine, decode):
             
 def decode_twothreefive(twothreefive, decode):
     one = decode[1]
-    four = decode[4]
-    
+    six = decode[6]
+
+    for f in one:
+        if f not in six: test = f
+
+    for num in twothreefive:
+        if all([f in num for f in one]):
+            decode[3] = num
+        elif test in num:
+            decode[2] = num
+        else: decode[5] = num
 
     return decode
+
+def decode_output(output, decode):
+    num = []
+    keys = [i for i in range(10)]
+    for o in output:
+        for k in keys:
+            test = decode[k]
+            if len(o) == len(test):
+                code = [s in o for s in test]
+                if all(code):
+                    num.append(str(k))
+
+    result = ''.join(num)
+
+    return int(result)
+
     
 def count_numbers(out):
     counts = 0
@@ -84,5 +109,9 @@ if __name__ == "__main__":
     sig = split_lines(signal)
     out = split_lines(output)
 
+    sum = 0
+
     for s, o in zip(sig, out):
         decode = decode_signal(s)
+        sum = sum + decode_output(o, decode)
+        print(sum)
